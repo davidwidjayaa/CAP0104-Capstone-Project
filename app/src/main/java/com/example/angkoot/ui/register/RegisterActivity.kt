@@ -49,7 +49,7 @@ class RegisterActivity : AppCompatActivity() {
                         if (!isPhoneNumberValid(phoneNumber))
                             setError(
                                 edtPhoneRegister,
-                                getString(R.string.edt_phone_number_message)
+                                getString(R.string.edt_phone_number_error_message)
                             )
                         else
                             clearError(edtPhoneRegister)
@@ -59,7 +59,7 @@ class RegisterActivity : AppCompatActivity() {
                         if (!isUsernameValid(username))
                             setError(
                                 edtUsernameRegister,
-                                getString(R.string.edt_username_message)
+                                getString(R.string.edt_username_error_message)
                             )
                         else
                             clearError(edtUsernameRegister)
@@ -69,7 +69,7 @@ class RegisterActivity : AppCompatActivity() {
                         if (!isPasswordValid(password))
                             setError(
                                 edtPasswordRegister,
-                                getString(R.string.edt_password_message)
+                                getString(R.string.edt_password_error_message)
                             )
                         else
                             clearError(edtPasswordRegister)
@@ -79,7 +79,7 @@ class RegisterActivity : AppCompatActivity() {
                         if (isPasswordValid(confirmPassword))
                             setError(
                                 edtConfirmPasswordRegister,
-                                getString(R.string.edt_confirm_password_message)
+                                getString(R.string.edt_confirm_password_error_message)
                             )
                         else
                             clearError(edtConfirmPasswordRegister)

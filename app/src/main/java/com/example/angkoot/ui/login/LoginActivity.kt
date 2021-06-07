@@ -43,14 +43,14 @@ class LoginActivity : AppCompatActivity() {
 
                     usernameText.observe(this@LoginActivity) { username ->
                         if (!isUsernameValid(username))
-                            setError(edtUsernameLogin, getString(R.string.edt_username_message))
+                            setError(edtUsernameLogin, getString(R.string.edt_username_error_message))
                         else
                             clearError(edtUsernameLogin)
                     }
 
                     passwordText.observe(this@LoginActivity) { password ->
                         if (!isPasswordValid(password))
-                            setError(edtPasswordLogin, getString(R.string.edt_password_message))
+                            setError(edtPasswordLogin, getString(R.string.edt_password_error_message))
                         else
                             clearError(edtPasswordLogin)
                     }
