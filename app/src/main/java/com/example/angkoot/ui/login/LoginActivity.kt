@@ -9,6 +9,7 @@ import com.example.angkoot.R
 import com.example.angkoot.databinding.ActivityLoginBinding
 import com.example.angkoot.utils.EditTextInputUtils
 import com.example.angkoot.utils.ToastUtils
+import com.example.angkoot.utils.ext.isAllTrue
 
 class LoginActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLoginBinding
@@ -42,17 +43,33 @@ class LoginActivity : AppCompatActivity() {
                 with(binding) {
 
                     usernameText.observe(this@LoginActivity) { username ->
-                        if (!isUsernameValid(username))
-                            setError(edtUsernameLogin, getString(R.string.edt_username_error_message))
-                        else
+                        if (!isUsernameValid(username)) {
+                            setError(
+                                edtUsernameLogin,
+                                getString(R.string.edt_username_error_message)
+                            )
+                            validateUsername(false)
+                        } else {
                             clearError(edtUsernameLogin)
+                            validateUsername(true)
+                        }
                     }
 
                     passwordText.observe(this@LoginActivity) { password ->
-                        if (!isPasswordValid(password))
-                            setError(edtPasswordLogin, getString(R.string.edt_password_error_message))
-                        else
+                        if (!isPasswordValid(password)) {
+                            setError(
+                                edtPasswordLogin,
+                                getString(R.string.edt_password_error_message)
+                            )
+                            validatePassword(false)
+                        } else {
                             clearError(edtPasswordLogin)
+                            validatePassword(true)
+                        }
+                    }
+
+                    areAllInputsValid.observe(this@LoginActivity) { validState ->
+                        btnLogin.isEnabled = validState.isAllTrue()
                     }
                 }
             }

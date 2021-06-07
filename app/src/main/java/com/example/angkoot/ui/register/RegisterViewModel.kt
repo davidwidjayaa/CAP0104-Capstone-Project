@@ -10,12 +10,12 @@ class RegisterViewModel : ViewModel() {
     private val _passwordText = MutableLiveData<String>()
     private val _confirmPasswordText = MutableLiveData<String>()
 
-    val areAllInputsValid = MutableLiveData(false)
-
     val phoneNumberText: LiveData<String> get() = _phoneNumberText
     val usernameText: LiveData<String> get() = _usernameText
     val passwordText: LiveData<String> get() = _passwordText
     val confirmPasswordText: LiveData<String> get() = _confirmPasswordText
+
+    var areAllInputsValid = MutableLiveData(listOf(false, false, false, false))
 
     fun setPhoneNumberText(newString: String) {
         _phoneNumberText.value = newString
@@ -31,5 +31,33 @@ class RegisterViewModel : ViewModel() {
 
     fun setConfirmPasswordText(newString: String) {
         _confirmPasswordText.value = newString
+    }
+
+    fun validatePhoneNumber(valid: Boolean) {
+        areAllInputsValid.value = areAllInputsValid.value?.mapIndexed { index, validState ->
+            if (index == 0) valid
+            else validState
+        }
+    }
+
+    fun validateUsername(valid: Boolean) {
+        areAllInputsValid.value = areAllInputsValid.value?.mapIndexed { index, validState ->
+            if (index == 1) valid
+            else validState
+        }
+    }
+
+    fun validatePassword(valid: Boolean) {
+        areAllInputsValid.value = areAllInputsValid.value?.mapIndexed { index, validState ->
+            if (index == 2) valid
+            else validState
+        }
+    }
+
+    fun validateConfirmPassword(valid: Boolean) {
+        areAllInputsValid.value = areAllInputsValid.value?.mapIndexed { index, validState ->
+            if (index == 3) valid
+            else validState
+        }
     }
 }

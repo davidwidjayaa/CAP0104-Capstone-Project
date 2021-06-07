@@ -9,6 +9,7 @@ import com.example.angkoot.R
 import com.example.angkoot.databinding.ActivityRegisterBinding
 import com.example.angkoot.utils.EditTextInputUtils
 import com.example.angkoot.utils.ToastUtils
+import com.example.angkoot.utils.ext.isAllTrue
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -46,48 +47,62 @@ class RegisterActivity : AppCompatActivity() {
                 with(EditTextInputUtils) {
 
                     phoneNumberText.observe(this@RegisterActivity) { phoneNumber ->
-                        if (!isPhoneNumberValid(phoneNumber))
+                        if (!isPhoneNumberValid(phoneNumber)) {
                             setError(
                                 edtPhoneRegister,
                                 getString(R.string.edt_phone_number_error_message)
                             )
-                        else
+                            validatePhoneNumber(false)
+                        } else {
                             clearError(edtPhoneRegister)
+                            validatePhoneNumber(true)
+                        }
                     }
 
                     usernameText.observe(this@RegisterActivity) { username ->
-                        if (!isUsernameValid(username))
+                        if (!isUsernameValid(username)) {
                             setError(
                                 edtUsernameRegister,
                                 getString(R.string.edt_username_error_message)
                             )
-                        else
+                            validateUsername(false)
+                        } else {
                             clearError(edtUsernameRegister)
+                            validateUsername(true)
+                        }
                     }
 
                     passwordText.observe(this@RegisterActivity) { password ->
-                        if (!isPasswordValid(password))
+                        if (!isPasswordValid(password)) {
                             setError(
                                 edtPasswordRegister,
                                 getString(R.string.edt_password_error_message)
                             )
-                        else
+                            validatePassword(false)
+                        } else {
                             clearError(edtPasswordRegister)
+                            validatePassword(true)
+                        }
                     }
 
                     confirmPasswordText.observe(this@RegisterActivity) { confirmPassword ->
-                        if (isPasswordValid(confirmPassword))
+                        if (confirmPassword.length >= MIN_PASSWORD_LENGTH &&
+                            confirmPassword.equals(edtPasswordRegister.text.toString())
+                        ) {
+                            validateConfirmPassword(true)
+                            clearError(edtConfirmPasswordRegister)
+                        } else {
                             setError(
                                 edtConfirmPasswordRegister,
                                 getString(R.string.edt_confirm_password_error_message)
                             )
-                        else
-                            clearError(edtConfirmPasswordRegister)
+                            validateConfirmPassword(false)
+                        }
                     }
                 }
 
-                areAllInputsValid.observe(this@RegisterActivity) { valid ->
-                    btnSignUp.isActivated = valid
+                areAllInputsValid.observe(this@RegisterActivity) { validState ->
+                    btnSignUp.isEnabled = validState.isAllTrue()
                 }
             }
         }
