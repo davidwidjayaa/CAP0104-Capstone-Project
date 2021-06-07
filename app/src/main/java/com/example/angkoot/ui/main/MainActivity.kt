@@ -8,9 +8,7 @@ import com.example.angkoot.ui.login.LoginActivity
 import com.example.angkoot.ui.register.RegisterActivity
 
 class MainActivity : AppCompatActivity() {
-
     private lateinit var binding: ActivityMainBinding
-    private lateinit var viewModel: MainViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
