@@ -4,8 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.main.MainActivity"
-    android:background="@color/black_800">
+    android:background="@color/black_800"
+    tools:context=".ui.main.MainActivity">
 
     <View
         android:id="@+id/view"
@@ -21,12 +21,12 @@
         android:id="@+id/judul"
         android:layout_width="305dp"
         android:layout_height="127dp"
+        android:fontFamily="@font/popextrabold"
         android:gravity="center_horizontal"
-        android:text="Angkoot"
+        android:text="@string/headline"
         android:textAlignment="center"
         android:textColor="@color/white"
-        android:fontFamily="@font/popextrabold"
-        android:textSize="46dp"
+        android:textSize="46sp"
         app:layout_constraintBottom_toBottomOf="@+id/view"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -37,10 +37,10 @@
         android:id="@+id/subjudul"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Go anywhere from everywhere easier."
-        android:textColor="@color/white"
-        android:textSize="12dp"
         android:fontFamily="@font/popregular"
+        android:text="@string/headline_2"
+        android:textColor="@color/white"
+        android:textSize="12sp"
         app:layout_constraintBottom_toBottomOf="@+id/judul"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.503"
@@ -58,16 +58,16 @@
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/icon_car" />
 
-    <com.google.android.material.button.MaterialButton
+    <Button
         android:id="@+id/buttonSignUp"
         android:layout_width="300dp"
         android:layout_height="48dp"
-        app:cornerRadius="50sp"
         android:fontFamily="@font/popbold"
-        android:text="Sign up"
+        android:text="@string/sign_up"
         android:textAllCaps="false"
         android:textColor="@color/white"
-        android:textSize="20dp"
+        android:textSize="20sp"
+        app:cornerRadius="50sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.495"
@@ -75,16 +75,16 @@
         app:layout_constraintTop_toBottomOf="@+id/view"
         app:layout_constraintVertical_bias="0.676" />
 
-    <com.google.android.material.button.MaterialButton
+    <Button
         android:id="@+id/buttonLogin"
         android:layout_width="300dp"
         android:layout_height="48dp"
         android:layout_marginTop="8dp"
         android:fontFamily="@font/popbold"
-        android:text="Log in"
+        android:text="@string/login"
         android:textAllCaps="false"
         android:textColor="@color/white"
-        android:textSize="20dp"
+        android:textSize="20sp"
         app:cornerRadius="50sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.495"

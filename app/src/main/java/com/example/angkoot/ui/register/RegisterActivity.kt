@@ -1,28 +1,24 @@
 package com.example.angkoot.ui.register
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
-import com.example.angkoot.R
-import com.example.angkoot.databinding.ActivityLoginBinding
+import androidx.appcompat.app.AppCompatActivity
 import com.example.angkoot.databinding.ActivityRegisterBinding
 
 class RegisterActivity : AppCompatActivity() {
-
-    private var activityRegisterBinding : ActivityRegisterBinding? = null
-    private val binding get() = activityRegisterBinding
+    private lateinit var binding: ActivityRegisterBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_register)
+        binding = ActivityRegisterBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        activityRegisterBinding = ActivityRegisterBinding.inflate(layoutInflater)
-        setContentView(binding?.root)
+        supportActionBar?.hide()
 
-        supportActionBar?.hide();
-
-        activityRegisterBinding!!.btnSignUp.setOnClickListener{
-            Toast.makeText(this, "Sign Up Success", Toast.LENGTH_SHORT).show()
+        with(binding) {
+            btnSignUp.setOnClickListener {
+                Toast.makeText(applicationContext, "Sign Up Success", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 }

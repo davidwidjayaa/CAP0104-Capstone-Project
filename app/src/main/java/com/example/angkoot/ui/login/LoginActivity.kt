@@ -1,30 +1,25 @@
 package com.example.angkoot.ui.login
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
-import com.example.angkoot.R
+import androidx.appcompat.app.AppCompatActivity
 import com.example.angkoot.databinding.ActivityLoginBinding
-import com.example.angkoot.databinding.ActivityMainBinding
 
 class LoginActivity : AppCompatActivity() {
-
-    private var activityLoginBinding : ActivityLoginBinding? = null
-    private val binding get() = activityLoginBinding
+    private lateinit var binding: ActivityLoginBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        binding = ActivityLoginBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        activityLoginBinding = ActivityLoginBinding.inflate(layoutInflater)
-        setContentView(binding?.root)
+        supportActionBar?.hide()
 
-        supportActionBar?.hide();
-
-        activityLoginBinding!!.btnLogin.setOnClickListener{
-            Toast.makeText(this, "Login Success", Toast.LENGTH_SHORT).show()
+        with(binding) {
+            btnLogin.setOnClickListener {
+                Toast.makeText(applicationContext, "Login Success", Toast.LENGTH_SHORT).show()
+            }
         }
-
-
     }
 
 }

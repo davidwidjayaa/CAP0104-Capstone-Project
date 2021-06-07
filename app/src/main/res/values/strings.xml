@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">Angkoot</string>
+    <string name="login">Login</string>
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+    <string name="btn_login">Login</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="phone_number">Phone number</string>
+    <string name="headline">Angkoot</string>
+    <string name="headline_2">Go anywhere from everywhere easier.</string>
 </resources>
