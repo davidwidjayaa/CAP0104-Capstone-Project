@@ -17,16 +17,16 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        supportActionBar?.hide();
+        supportActionBar?.hide()
 
         with(binding) {
-            buttonLogin.setOnClickListener {
+            btnGotoLogin.setOnClickListener {
                 Intent(this@MainActivity, LoginActivity::class.java).apply {
                     startActivity(this)
                 }
             }
 
-            buttonSignUp.setOnClickListener {
+            btnGotoSignUp.setOnClickListener {
                 Intent(this@MainActivity, RegisterActivity::class.java).apply {
                     startActivity(this)
                 }
