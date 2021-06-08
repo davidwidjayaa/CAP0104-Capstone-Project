@@ -1,6 +1,7 @@
 package com.example.angkoot.ui.ordering
 
 import android.Manifest
+import android.content.IntentSender
 import android.location.Geocoder
 import android.os.Build
 import android.os.Bundle
@@ -13,18 +14,23 @@ import com.example.angkoot.databinding.FragmentOrderingBinding
 import com.example.angkoot.utils.PermissionUtils
 import com.example.angkoot.utils.PermissionUtils.REQUEST_CODE_LOCATION_PERMISSION
 import com.example.angkoot.utils.ToastUtils
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationServices
+import com.example.angkoot.utils.ext.hide
+import com.example.angkoot.utils.ext.show
+import com.google.android.gms.common.api.ApiException
+import com.google.android.gms.common.api.ResolvableApiException
+import com.google.android.gms.location.*
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.model.*
 import dagger.hilt.android.AndroidEntryPoint
 import pub.devrel.easypermissions.AppSettingsDialog
 import pub.devrel.easypermissions.EasyPermissions
 import java.io.IOException
+import java.util.*
 
 @AndroidEntryPoint
-class OrderingFragment : Fragment(), EasyPermissions.PermissionCallbacks {
+class OrderingFragment : Fragment(), OnMapReadyCallback, EasyPermissions.PermissionCallbacks {
     private var _binding: FragmentOrderingBinding? = null
     private val binding get() = _binding!!
     private var _view: View? = null
@@ -54,22 +60,21 @@ class OrderingFragment : Fragment(), EasyPermissions.PermissionCallbacks {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        binding.mapViewOrdering.onCreate(savedInstanceState)
 
         requestPermission()
-        //initUI()
-        //observeData()
+        initUI()
+        observeData()
     }
 
     private fun initUI() {
         _fusedLocationProviderClient =
             LocationServices.getFusedLocationProviderClient(requireActivity())
 
-        with(binding) {
-            mapViewOrdering.getMapAsync {
-                _googleMap = it
+        _geoCoder = Geocoder(requireContext(), Locale.getDefault())
 
-                getLastLocation()
-            }
+        with(binding) {
+            mapViewOrdering.getMapAsync(this@OrderingFragment)
         }
     }
 
@@ -108,12 +113,51 @@ class OrderingFragment : Fragment(), EasyPermissions.PermissionCallbacks {
         }
     }
 
+    private fun getCurrentLocation() {
+        val locationRequest = LocationRequest().apply {
+            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+            interval = (10 * 1000).toLong()
+            fastestInterval = 2000
+        }
+
+        val locationSettingsRequest = LocationSettingsRequest.Builder().apply {
+            addLocationRequest(locationRequest)
+        }.build()
+
+        LocationServices.getSettingsClient(requireContext())
+            .checkLocationSettings(locationSettingsRequest).apply {
+                addOnCompleteListener { task ->
+                    try {
+                        val response = task.getResult(ApiException::class.java)
+
+                        if (response != null && response.locationSettingsStates.isLocationPresent) {
+                            getLastLocation()
+                        }
+                    } catch (exception: ApiException) {
+                        when (exception.statusCode) {
+                            LocationSettingsStatusCodes.RESOLUTION_REQUIRED -> try {
+                                val resolvable = exception as ResolvableApiException
+                                resolvable.startResolutionForResult(
+                                    requireActivity(),
+                                    REQUEST_CHECK_SETTING
+                                )
+                            } catch (e: IntentSender.SendIntentException) {
+                            } catch (e: ClassCastException) {
+                            }
+
+                            LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE -> {
+                            }
+                        }
+                    }
+                }
+            }
+    }
+
     private fun getLastLocation() {
         if (PermissionUtils.checkLocationPermission(requireContext())) {
             fusedLocationProviderClient.lastLocation.addOnCompleteListener {
                 if (it.isSuccessful && it.result != null) {
                     val lastLocation = it.result
-                    var address = "No known address"
 
                     try {
                         val addressList = geoCoder.getFromLocation(
@@ -122,13 +166,16 @@ class OrderingFragment : Fragment(), EasyPermissions.PermissionCallbacks {
                             1
                         )
 
-                        if (addressList.isNotEmpty()) {
-                            address = addressList[0].getAddressLine(0)
-                        }
+                        val currentAddress = addressList[0]
 
                         currentLocationMarker?.remove()
-                        moveMapCameraTo(LatLng(lastLocation.latitude, lastLocation.longitude))
+                        moveMapCameraTo(LatLng(currentAddress.latitude, currentAddress.longitude))
                         googleMap.isMyLocationEnabled = true
+
+                        with(binding) {
+                            mapViewOrdering.show()
+                            progressbar.hide()
+                        }
 
                     } catch (e: IOException) {
                         e.printStackTrace()
@@ -191,6 +238,11 @@ class OrderingFragment : Fragment(), EasyPermissions.PermissionCallbacks {
     }
 
     // LIFECYCLE
+    override fun onMapReady(googleMap: GoogleMap?) {
+        _googleMap = googleMap
+        getCurrentLocation()
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _fusedLocationProviderClient = null
@@ -200,39 +252,40 @@ class OrderingFragment : Fragment(), EasyPermissions.PermissionCallbacks {
         _view = null
     }
 
-//    override fun onResume() {
-//        super.onResume()
-//        getLastLocation()
-//        _binding?.mapViewOrdering?.onResume()
-//    }
+    override fun onResume() {
+        super.onResume()
+        getLastLocation()
+        _binding?.mapViewOrdering?.onResume()
+    }
 
-//    override fun onStart() {
-//        super.onStart()
-//        _binding?.mapViewOrdering?.onStart()
-//    }
-//
-//    override fun onPause() {
-//        super.onPause()
-//        _binding?.mapViewOrdering?.onPause()
-//    }
-//
-//    override fun onStop() {
-//        super.onStop()
-//        _binding?.mapViewOrdering?.onStop()
-//    }
-//
-//    override fun onLowMemory() {
-//        super.onLowMemory()
-//        _binding?.mapViewOrdering?.onLowMemory()
-//    }
-//
-//    override fun onSaveInstanceState(outState: Bundle) {
-//        super.onSaveInstanceState(outState)
-//        _binding?.mapViewOrdering?.onSaveInstanceState(outState)
-//    }
+    override fun onStart() {
+        super.onStart()
+        _binding?.mapViewOrdering?.onStart()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        _binding?.mapViewOrdering?.onPause()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        _binding?.mapViewOrdering?.onStop()
+    }
+
+    override fun onLowMemory() {
+        super.onLowMemory()
+        _binding?.mapViewOrdering?.onLowMemory()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        _binding?.mapViewOrdering?.onSaveInstanceState(outState)
+    }
 
     // CONSTANTS
     companion object {
         const val DEFAULT_ZOOM = 17f
+        const val REQUEST_CHECK_SETTING = 120
     }
 }
