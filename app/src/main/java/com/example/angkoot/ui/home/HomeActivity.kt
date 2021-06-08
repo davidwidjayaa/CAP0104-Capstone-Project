@@ -21,6 +21,7 @@ class HomeActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityHomeBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        supportActionBar?.hide()
 
         val homeNavHostFragment =
             supportFragmentManager.findFragmentById(R.id.home_nav_host_fragment) as NavHostFragment

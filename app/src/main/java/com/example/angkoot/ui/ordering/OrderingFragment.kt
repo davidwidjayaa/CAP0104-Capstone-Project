@@ -23,6 +23,7 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.model.*
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import dagger.hilt.android.AndroidEntryPoint
 import pub.devrel.easypermissions.AppSettingsDialog
 import pub.devrel.easypermissions.EasyPermissions
@@ -61,6 +62,11 @@ class OrderingFragment : Fragment(), OnMapReadyCallback, EasyPermissions.Permiss
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.mapViewOrdering.onCreate(savedInstanceState)
+
+        BottomSheetBehavior.from(binding.sheet).apply {
+            peekHeight=100
+            this.state = BottomSheetBehavior.STATE_COLLAPSED
+        }
 
         requestPermission()
         initUI()

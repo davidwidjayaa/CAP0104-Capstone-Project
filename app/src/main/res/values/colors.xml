@@ -22,6 +22,9 @@
     <color name="mtrl_textinput_default_box_stroke_color">#fff</color>
     <color name="btn_disabled">#622B2B</color>
 
+    <color name="light_grey">#FFECECEC</color>
+    <color name="shadow_grey">#878787</color>
+    <color name="shadow_grey_2">#9A9A9A</color>
     <!--//extra color-->
     <!--    <color name="grey_100">#eeeeee</color>-->
     <!--    <color name="grey_900">#393e46</color>-->
