@@ -20,6 +20,7 @@
     <color name="white">#FFFFFFFF</color>
 
     <color name="mtrl_textinput_default_box_stroke_color">#fff</color>
+    <color name="btn_disabled">#622B2B</color>
 
     <!--//extra color-->
     <!--    <color name="grey_100">#eeeeee</color>-->
