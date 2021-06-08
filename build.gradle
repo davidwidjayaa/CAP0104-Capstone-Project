@@ -11,10 +11,12 @@ buildscript {
         fragmentVersion = '1.3.4'
 
         hiltVersion = '2.35.1'
+        retrofitVersion = '2.9.0'
         glideVersion = '4.12.0'
         navigationComponentVersion = '2.3.5'
 
         gmsServiceVersion = '17.0.0'
+        gmsPlacesServiceVersion = '2.4.0'
         easyPermissionVersion = '3.0.0'
     }
     repositories {
