@@ -1,5 +1,6 @@
 package com.example.angkoot.ui.login
 
+import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -7,6 +8,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.example.angkoot.R
 import com.example.angkoot.databinding.ActivityLoginBinding
+import com.example.angkoot.ui.home.HomeActivity
 import com.example.angkoot.utils.EditTextInputUtils
 import com.example.angkoot.utils.ToastUtils
 import com.example.angkoot.utils.ext.isAllTrue
@@ -33,6 +35,10 @@ class LoginActivity : AppCompatActivity() {
 
             btnLogin.setOnClickListener {
                 ToastUtils.show(applicationContext, getString(R.string.login_success_message))
+
+                with(Intent(applicationContext, HomeActivity::class.java)) {
+                    startActivity(this)
+                }
             }
         }
     }
