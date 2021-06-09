@@ -5,6 +5,7 @@ import android.content.IntentSender
 import android.location.Geocoder
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,6 +17,7 @@ import com.example.angkoot.utils.PermissionUtils.REQUEST_CODE_LOCATION_PERMISSIO
 import com.example.angkoot.utils.ToastUtils
 import com.example.angkoot.utils.ext.hide
 import com.example.angkoot.utils.ext.show
+import com.example.angkoot.vo.StatusRes
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
@@ -25,11 +27,13 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.model.*
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.FlowPreview
 import pub.devrel.easypermissions.AppSettingsDialog
 import pub.devrel.easypermissions.EasyPermissions
 import java.io.IOException
 import java.util.*
 
+@FlowPreview
 @AndroidEntryPoint
 class OrderingFragment : Fragment(), OnMapReadyCallback, EasyPermissions.PermissionCallbacks {
     private var _binding: FragmentOrderingBinding? = null
@@ -64,8 +68,8 @@ class OrderingFragment : Fragment(), OnMapReadyCallback, EasyPermissions.Permiss
         binding.mapViewOrdering.onCreate(savedInstanceState)
 
         BottomSheetBehavior.from(binding.sheet).apply {
-            peekHeight=100
-            this.state = BottomSheetBehavior.STATE_EXPANDED
+            peekHeight = 100
+            state = BottomSheetBehavior.STATE_EXPANDED
         }
 
         requestPermission()
@@ -81,11 +85,27 @@ class OrderingFragment : Fragment(), OnMapReadyCallback, EasyPermissions.Permiss
 
         with(binding) {
             mapViewOrdering.getMapAsync(this@OrderingFragment)
+
+            svPickup.setOnQueryTextListener(svPickupListener)
+            svDrop.setOnQueryTextListener(svDropListener)
         }
     }
 
     private fun observeData() {
-        //
+        with(viewModel) {
+            getSearchingPlacesPickupResults().observe(viewLifecycleOwner) {
+                when (it.status) {
+                    StatusRes.LOADING -> {
+                    }
+                    StatusRes.ERROR -> {
+                    }
+                    StatusRes.SUCCESS -> {
+                        Log.d("Hehe", "Data: ${it.data}")
+                        Log.d("Hehe", "Message: ${it.message}")
+                    }
+                }
+            }
+        }
     }
 
     private fun setMarker(latLng: LatLng, locationName: String) {
@@ -177,6 +197,12 @@ class OrderingFragment : Fragment(), OnMapReadyCallback, EasyPermissions.Permiss
                         currentLocationMarker?.remove()
                         moveMapCameraTo(LatLng(currentAddress.latitude, currentAddress.longitude))
                         googleMap.isMyLocationEnabled = true
+
+                        with(binding) {
+                            svPickup.setQuery("Current Location", false)
+                            svDrop.isIconified = true
+                            svDrop.requestFocus()
+                        }
 
                         with(binding) {
                             mapViewOrdering.show()
@@ -287,6 +313,30 @@ class OrderingFragment : Fragment(), OnMapReadyCallback, EasyPermissions.Permiss
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         _binding?.mapViewOrdering?.onSaveInstanceState(outState)
+    }
+
+    private val svPickupListener = object : android.widget.SearchView.OnQueryTextListener {
+        override fun onQueryTextSubmit(query: String?): Boolean =
+            false
+
+        override fun onQueryTextChange(newText: String?): Boolean {
+            if (newText != null)
+                viewModel.setQueryForSearchingPlacesPickup(newText)
+
+            return true
+        }
+    }
+
+    private val svDropListener = object : android.widget.SearchView.OnQueryTextListener {
+        override fun onQueryTextSubmit(query: String?): Boolean =
+            false
+
+        override fun onQueryTextChange(newText: String?): Boolean {
+            if (newText != null)
+                viewModel.setQueryForSearchingPlacesDrop(newText)
+
+            return true
+        }
     }
 
     // CONSTANTS
