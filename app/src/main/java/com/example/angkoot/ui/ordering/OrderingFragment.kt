@@ -88,6 +88,7 @@ class OrderingFragment : Fragment(), OnMapReadyCallback, EasyPermissions.Permiss
         _geoCoder = Geocoder(requireContext(), Locale.getDefault())
 
         placesAdapter = PlacesAdapter()
+        placesAdapter?.setItemCallback(this)
 
         with(binding) {
             mapViewOrdering.getMapAsync(this@OrderingFragment)
@@ -329,6 +330,8 @@ class OrderingFragment : Fragment(), OnMapReadyCallback, EasyPermissions.Permiss
         _fusedLocationProviderClient = null
         _googleMap = null
         currentLocationMarker = null
+        placesAdapter?.setItemCallback(null)
+        placesAdapter = null
         _binding = null
         _view = null
     }

@@ -45,7 +45,7 @@ class PlacesAdapter : ListAdapter<Place, PlacesAdapter.PlacesViewHolder>(PlaceCo
 
     private var callback: OnClickCallback? = null
 
-    fun setItemCallback(callback: OnClickCallback) {
+    fun setItemCallback(callback: OnClickCallback?) {
         this.callback = callback
     }
 }
