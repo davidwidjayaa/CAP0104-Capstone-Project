@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.angkoot.data.AngkootRepository
 import com.example.angkoot.domain.model.Place
 import com.example.angkoot.vo.Resource
+import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collect
@@ -22,6 +23,17 @@ class OrderingViewModel @Inject constructor(
 ) : ViewModel() {
     private val queryForSearchingPlacesPickup = MutableLiveData<String>()
     private val queryForSearchingPlacesDrop = MutableLiveData<String>()
+
+    private var latLngPickup: LatLng? = null
+    private var latLngDrop: LatLng? = null
+
+    fun setLatLngPickup(latLng: LatLng) {
+        latLngPickup = latLng
+    }
+
+    fun setLatLngDrop(latLng: LatLng) {
+        latLngDrop = latLng
+    }
 
     private val searchingPlacesPickupResults = object : MutableLiveData<Resource<List<Place>?>>() {
         override fun onActive() {

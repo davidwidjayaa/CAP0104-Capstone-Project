@@ -11,7 +11,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.angkoot.databinding.FragmentOrderingBinding
+import com.example.angkoot.domain.model.Place
 import com.example.angkoot.utils.PermissionUtils
 import com.example.angkoot.utils.PermissionUtils.REQUEST_CODE_LOCATION_PERMISSION
 import com.example.angkoot.utils.ToastUtils
@@ -35,10 +37,12 @@ import java.util.*
 
 @FlowPreview
 @AndroidEntryPoint
-class OrderingFragment : Fragment(), OnMapReadyCallback, EasyPermissions.PermissionCallbacks {
+class OrderingFragment : Fragment(), OnMapReadyCallback, EasyPermissions.PermissionCallbacks,
+    PlacesAdapter.OnClickCallback {
     private var _binding: FragmentOrderingBinding? = null
     private val binding get() = _binding!!
     private var _view: View? = null
+    private var placesAdapter: PlacesAdapter? = null
 
     private val viewModel: OrderingViewModel by viewModels()
 
@@ -83,8 +87,17 @@ class OrderingFragment : Fragment(), OnMapReadyCallback, EasyPermissions.Permiss
 
         _geoCoder = Geocoder(requireContext(), Locale.getDefault())
 
+        placesAdapter = PlacesAdapter()
+
         with(binding) {
             mapViewOrdering.getMapAsync(this@OrderingFragment)
+
+            with(rvSearchingResults) {
+                layoutManager =
+                    LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
+                setHasFixedSize(true)
+                adapter = placesAdapter
+            }
 
             svPickup.setOnQueryTextListener(svPickupListener)
             svDrop.setOnQueryTextListener(svDropListener)
@@ -96,12 +109,15 @@ class OrderingFragment : Fragment(), OnMapReadyCallback, EasyPermissions.Permiss
             getSearchingPlacesPickupResults().observe(viewLifecycleOwner) {
                 when (it.status) {
                     StatusRes.LOADING -> {
+                        binding.progressbar.show()
                     }
                     StatusRes.ERROR -> {
+                        binding.progressbar.hide()
                     }
                     StatusRes.SUCCESS -> {
                         Log.d("Hehe", "Data: ${it.data}")
                         Log.d("Hehe", "Message: ${it.message}")
+                        binding.progressbar.hide()
                     }
                 }
             }
@@ -109,12 +125,21 @@ class OrderingFragment : Fragment(), OnMapReadyCallback, EasyPermissions.Permiss
             getSearchingPlacesDropResults().observe(viewLifecycleOwner) {
                 when (it.status) {
                     StatusRes.LOADING -> {
+                        binding.progressbar.show()
+                        binding.rvSearchingResults.hide()
                     }
                     StatusRes.ERROR -> {
+                        binding.progressbar.hide()
+                        binding.rvSearchingResults.hide()
                     }
                     StatusRes.SUCCESS -> {
                         Log.d("Hehe", "Data: ${it.data}")
                         Log.d("Hehe", "Message: ${it.message}")
+                        if (it.data != null && it.data.isNotEmpty()) {
+                            placesAdapter?.submitList(it.data)
+                        }
+                        binding.rvSearchingResults.show()
+                        binding.progressbar.hide()
                     }
                 }
             }
@@ -211,8 +236,15 @@ class OrderingFragment : Fragment(), OnMapReadyCallback, EasyPermissions.Permiss
                         moveMapCameraTo(LatLng(currentAddress.latitude, currentAddress.longitude))
                         googleMap.isMyLocationEnabled = true
 
+                        viewModel.setLatLngPickup(
+                            LatLng(
+                                lastLocation.latitude,
+                                lastLocation.longitude,
+                            )
+                        )
+
                         with(binding) {
-                            svPickup.setQuery("Current Location", false)
+                            svPickup.queryHint = "Current Location set"
                             svDrop.isIconified = true
                             svDrop.requestFocus()
                         }
@@ -237,6 +269,10 @@ class OrderingFragment : Fragment(), OnMapReadyCallback, EasyPermissions.Permiss
                 }
             }
         }
+    }
+
+    override fun onClick(place: Place) {
+        binding.rvSearchingResults.hide()
     }
 
     private fun requestPermission() {
