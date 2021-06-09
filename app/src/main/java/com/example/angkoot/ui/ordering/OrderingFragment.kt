@@ -65,7 +65,7 @@ class OrderingFragment : Fragment(), OnMapReadyCallback, EasyPermissions.Permiss
 
         BottomSheetBehavior.from(binding.sheet).apply {
             peekHeight=100
-            this.state = BottomSheetBehavior.STATE_COLLAPSED
+            this.state = BottomSheetBehavior.STATE_EXPANDED
         }
 
         requestPermission()
@@ -173,7 +173,7 @@ class OrderingFragment : Fragment(), OnMapReadyCallback, EasyPermissions.Permiss
                         )
 
                         val currentAddress = addressList[0]
-
+                        //latitude longtitude
                         currentLocationMarker?.remove()
                         moveMapCameraTo(LatLng(currentAddress.latitude, currentAddress.longitude))
                         googleMap.isMyLocationEnabled = true

@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.example.angkoot.databinding.ActivityMainBinding
+import com.example.angkoot.ui.home.HomeActivity
 import com.example.angkoot.ui.login.LoginActivity
 import com.example.angkoot.ui.register.RegisterActivity
 
@@ -19,7 +20,7 @@ class MainActivity : AppCompatActivity() {
 
         with(binding) {
             btnGotoLogin.setOnClickListener {
-                Intent(this@MainActivity, LoginActivity::class.java).apply {
+                Intent(this@MainActivity, HomeActivity::class.java).apply {
                     startActivity(this)
                 }
             }
