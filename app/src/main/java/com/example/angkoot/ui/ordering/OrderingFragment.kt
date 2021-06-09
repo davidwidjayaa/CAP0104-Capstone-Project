@@ -105,6 +105,19 @@ class OrderingFragment : Fragment(), OnMapReadyCallback, EasyPermissions.Permiss
                     }
                 }
             }
+
+            getSearchingPlacesDropResults().observe(viewLifecycleOwner) {
+                when (it.status) {
+                    StatusRes.LOADING -> {
+                    }
+                    StatusRes.ERROR -> {
+                    }
+                    StatusRes.SUCCESS -> {
+                        Log.d("Hehe", "Data: ${it.data}")
+                        Log.d("Hehe", "Message: ${it.message}")
+                    }
+                }
+            }
         }
     }
 
