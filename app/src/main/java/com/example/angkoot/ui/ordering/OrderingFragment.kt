@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.angkoot.R
 import com.example.angkoot.databinding.FragmentOrderingBinding
 import com.example.angkoot.domain.model.Place
 import com.example.angkoot.utils.PermissionUtils
@@ -86,6 +87,8 @@ class OrderingFragment : Fragment(), OnMapReadyCallback,
 
         with(binding) {
             mapViewOrdering.getMapAsync(this@OrderingFragment)
+            tvPickupPointPreview.text = getString(R.string.pickup_point_preview)
+            tvDropPointPreview.text = getString(R.string.drop_point_preview)
 
             with(rvSearchingResults) {
                 layoutManager =
@@ -112,7 +115,15 @@ class OrderingFragment : Fragment(), OnMapReadyCallback,
                     StatusRes.SUCCESS -> {
                         Log.d("Hehe", "Data: ${it.data}")
                         Log.d("Hehe", "Message: ${it.message}")
-                        binding.progressbar.hide()
+
+                        if (it.data != null && it.data.isNotEmpty()) {
+                            placesAdapter?.submitList(it.data)
+                        }
+
+                        with(binding) {
+                            rvSearchingResults.show()
+                            progressbar.hide()
+                        }
                     }
                 }
             }
@@ -130,11 +141,15 @@ class OrderingFragment : Fragment(), OnMapReadyCallback,
                     StatusRes.SUCCESS -> {
                         Log.d("Hehe", "Data: ${it.data}")
                         Log.d("Hehe", "Message: ${it.message}")
+
                         if (it.data != null && it.data.isNotEmpty()) {
                             placesAdapter?.submitList(it.data)
                         }
-                        binding.rvSearchingResults.show()
-                        binding.progressbar.hide()
+
+                        with(binding) {
+                            rvSearchingResults.show()
+                            progressbar.hide()
+                        }
                     }
                 }
             }
@@ -267,7 +282,11 @@ class OrderingFragment : Fragment(), OnMapReadyCallback,
     }
 
     override fun onClick(place: Place) {
-        binding.rvSearchingResults.hide()
+        with(binding) {
+            rvSearchingResults.hide()
+            svDrop.clearFocus()
+            svPickup.clearFocus()
+        }
     }
 
     // LIFECYCLE
