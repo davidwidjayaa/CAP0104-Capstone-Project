@@ -22,21 +22,11 @@ fun List<PlacesResponse>.asModel(): List<Place> {
     return places
 }
 
-@JvmName("asModelDetailPlacesResponse")
-fun List<DetailPlacesResponse>.asModel(): List<Place> {
-    val places = ArrayList<Place>()
-
-    for (place in this) {
-        places.add(
-            Place(
-                place.id,
-                place.geometry,
-                place.iconUrl,
-                place.name,
-                null
-            )
-        )
-    }
-
-    return places
-}
+fun DetailPlacesResponse.asModel(): Place =
+    Place(
+        this.id,
+        this.geometry,
+        this.iconUrl,
+        this.name,
+        null
+    )
