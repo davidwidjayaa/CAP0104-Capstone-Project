@@ -1,9 +1,6 @@
 package com.example.angkoot.ui.ordering
 
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.asFlow
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import com.example.angkoot.data.AngkootRepository
 import com.example.angkoot.domain.model.Place
 import com.example.angkoot.vo.Resource
@@ -26,6 +23,19 @@ class OrderingViewModel @Inject constructor(
 
     private var latLngPickup: LatLng? = null
     private var latLngDrop: LatLng? = null
+
+    private lateinit var _pickupPointDetail: LiveData<Resource<Place>>
+    val pickupPointDetail: LiveData<Resource<Place>> get() = _pickupPointDetail
+    private lateinit var _dropPointDetail: LiveData<Resource<Place>>
+    val dropPointDetail: LiveData<Resource<Place>> get() = _dropPointDetail
+
+    fun setDetailOfPickupPlace(placeId: String) = viewModelScope.launch {
+        _pickupPointDetail = repository.getDetailPlacesOf(placeId)
+    }
+
+    fun setDetailOfDropPlace(placeId: String) = viewModelScope.launch {
+        _dropPointDetail = repository.getDetailPlacesOf(placeId)
+    }
 
     fun setLatLngPickup(latLng: LatLng) {
         latLngPickup = latLng

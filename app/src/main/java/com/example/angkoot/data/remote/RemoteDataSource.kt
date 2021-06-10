@@ -37,7 +37,7 @@ class RemoteDataSource @Inject constructor(
             val data = callResults.body()
 
             if (callResults.isSuccessful && data != null) {
-                emit(Resource.success(data.results?.asModel()))
+                emit(Resource.success(data.results.asModel()))
             } else {
                 emit(Resource.error(null, callResults.message()))
             }

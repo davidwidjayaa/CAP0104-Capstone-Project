@@ -6,5 +6,5 @@ import com.google.gson.annotations.SerializedName
 data class GetDetailPlacesResponse(
     @SerializedName("result")
     @Expose
-    val results: List<DetailPlacesResponse>?
+    val results: DetailPlacesResponse
 )

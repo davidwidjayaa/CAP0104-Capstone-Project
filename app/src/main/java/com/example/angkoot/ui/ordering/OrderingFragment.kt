@@ -39,6 +39,7 @@ class OrderingFragment : Fragment(), OnMapReadyCallback,
     private val binding get() = _binding!!
     private var _view: View? = null
     private var placesAdapter: PlacesAdapter? = null
+    private var isDestinationSearchingActive: Boolean = false
 
     private val viewModel: OrderingViewModel by viewModels()
 
@@ -113,9 +114,6 @@ class OrderingFragment : Fragment(), OnMapReadyCallback,
                         binding.progressbar.hide()
                     }
                     StatusRes.SUCCESS -> {
-                        Log.d("Hehe", "Data: ${it.data}")
-                        Log.d("Hehe", "Message: ${it.message}")
-
                         if (it.data != null && it.data.isNotEmpty()) {
                             placesAdapter?.submitList(it.data)
                         }
@@ -139,9 +137,6 @@ class OrderingFragment : Fragment(), OnMapReadyCallback,
                         binding.rvSearchingResults.hide()
                     }
                     StatusRes.SUCCESS -> {
-                        Log.d("Hehe", "Data: ${it.data}")
-                        Log.d("Hehe", "Message: ${it.message}")
-
                         if (it.data != null && it.data.isNotEmpty()) {
                             placesAdapter?.submitList(it.data)
                         }
@@ -150,6 +145,38 @@ class OrderingFragment : Fragment(), OnMapReadyCallback,
                             rvSearchingResults.show()
                             progressbar.hide()
                         }
+                    }
+                }
+            }
+
+            pickupPointDetail.observe(viewLifecycleOwner) {
+                when (it.status) {
+                    StatusRes.LOADING -> {
+                        binding.progressbar.show()
+                    }
+                    StatusRes.ERROR -> {
+                        binding.progressbar.hide()
+                    }
+                    StatusRes.SUCCESS -> {
+                        Log.d("Hehe", "Data: ${it.data}")
+                        Log.d("Hehe", "Message: ${it.message}")
+                        binding.progressbar.hide()
+                    }
+                }
+            }
+
+            dropPointDetail.observe(viewLifecycleOwner) {
+                when (it.status) {
+                    StatusRes.LOADING -> {
+                        binding.progressbar.show()
+                    }
+                    StatusRes.ERROR -> {
+                        binding.progressbar.hide()
+                    }
+                    StatusRes.SUCCESS -> {
+                        Log.d("Hehe", "Data: ${it.data}")
+                        Log.d("Hehe", "Message: ${it.message}")
+                        binding.progressbar.hide()
                     }
                 }
             }
@@ -254,9 +281,9 @@ class OrderingFragment : Fragment(), OnMapReadyCallback,
                         )
 
                         with(binding) {
-                            svPickup.queryHint = "Current Location set"
                             svDrop.isIconified = true
                             svDrop.requestFocus()
+                            isDestinationSearchingActive = true
                         }
 
                         with(binding) {
@@ -276,6 +303,7 @@ class OrderingFragment : Fragment(), OnMapReadyCallback,
 
                     moveMapCameraTo(LatLng(-6.23139938, 106.95464244))
                     googleMap.isMyLocationEnabled = true
+                    isDestinationSearchingActive = false
                 }
             }
         }
@@ -286,6 +314,12 @@ class OrderingFragment : Fragment(), OnMapReadyCallback,
             rvSearchingResults.hide()
             svDrop.clearFocus()
             svPickup.clearFocus()
+
+            if (isDestinationSearchingActive) {
+                viewModel.setDetailOfDropPlace(place.id)
+            } else {
+                viewModel.setDetailOfPickupPlace(place.id)
+            }
         }
     }
 
@@ -342,8 +376,10 @@ class OrderingFragment : Fragment(), OnMapReadyCallback,
             false
 
         override fun onQueryTextChange(newText: String?): Boolean {
-            if (newText != null)
+            if (newText != null) {
                 viewModel.setQueryForSearchingPlacesPickup(newText)
+                isDestinationSearchingActive = false
+            }
 
             return true
         }
@@ -354,8 +390,10 @@ class OrderingFragment : Fragment(), OnMapReadyCallback,
             false
 
         override fun onQueryTextChange(newText: String?): Boolean {
-            if (newText != null)
+            if (newText != null) {
                 viewModel.setQueryForSearchingPlacesDrop(newText)
+                isDestinationSearchingActive = true
+            }
 
             return true
         }
