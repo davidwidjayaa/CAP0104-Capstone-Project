@@ -29,4 +29,5 @@
 
     <string name="pickup_point_preview">Origin Place</string>
     <string name="drop_point_preview">Destination Place</string>
+    <string name="succesfully_setup_place_message">Place setup</string>
 </resources>
