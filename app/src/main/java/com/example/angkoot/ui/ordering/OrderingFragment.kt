@@ -215,9 +215,9 @@ class OrderingFragment : Fragment(), OnMapReadyCallback,
     private fun getLastLocation() {
         if (PermissionUtils.checkLocationPermission(requireContext())) {
             fusedLocationProviderClient.lastLocation.addOnCompleteListener {
-                if (it.isSuccessful && it.result != null) {
-                    val lastLocation = it.result
+                val lastLocation = it.result
 
+                if (it.isSuccessful && lastLocation != null) {
                     try {
                         val addressList = geoCoder.getFromLocation(
                             lastLocation.latitude,
