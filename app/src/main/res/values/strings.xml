@@ -26,4 +26,7 @@
     <string name="register_success_message">Successfully registered</string>
     <string name="register_failed_message">Failed to register</string>
     <string name="register_failed_user_already_exists_message">Sign up failed, user already exist</string>
+
+    <string name="pickup_point_preview">Origin Place</string>
+    <string name="drop_point_preview">Destination Place</string>
 </resources>
