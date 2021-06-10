@@ -1,7 +1,6 @@
 package com.example.angkoot.ui.home
 
 import android.os.Bundle
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
@@ -18,7 +17,7 @@ import dagger.hilt.android.AndroidEntryPoint
 class HomeActivity : AppCompatActivity() {
     private lateinit var binding: ActivityHomeBinding
     private lateinit var navController: NavController
-    private lateinit var currentUser: UserModel
+    lateinit var currentUser: UserModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,7 +26,6 @@ class HomeActivity : AppCompatActivity() {
         supportActionBar?.hide()
 
         currentUser = intent.getParcelableExtra<UserModel>(PARAMS_USER) as UserModel
-        Log.d("Hehe", intent.getParcelableExtra<UserModel>(PARAMS_USER)?.username ?: "")
 
         val homeNavHostFragment =
             supportFragmentManager.findFragmentById(R.id.home_nav_host_fragment) as NavHostFragment
