@@ -20,7 +20,7 @@ interface ApiEndpoint {
     @Headers("Accept-Encoding: identity")
     @GET("${PATH}/details/json")
     suspend fun getDetailPlaceOf(
-        @Query("placeid") id: String,
+        @Query("place_id") id: String,
         @Query("key") apiKey: String = MAP_API_KEY
     ): Response<GetDetailPlacesResponse>
 
