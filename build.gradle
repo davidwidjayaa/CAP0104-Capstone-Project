@@ -16,7 +16,6 @@ buildscript {
         navigationComponentVersion = '2.3.5'
 
         gmsServiceVersion = '17.0.0'
-        gmsPlacesServiceVersion = '2.4.0'
         easyPermissionVersion = '3.0.0'
     }
     repositories {
