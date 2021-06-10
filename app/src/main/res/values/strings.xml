@@ -1,5 +1,5 @@
 <resources>
-<!--    <string name="google_maps_key">AIzaSyABTaGA514fh_dmCBOuKb-K-Mrhx75RC1s</string>-->
+    <!--    <string name="google_maps_key">AIzaSyABTaGA514fh_dmCBOuKb-K-Mrhx75RC1s</string>-->
     <string name="google_maps_key">AIzaSyDyfJbhzX31VKqr4BQMQwz1SQjpicyNv6E</string>
     <string name="app_name">Angkoot</string>
 
@@ -22,6 +22,8 @@
 
     <string name="login_success_message">Successfully logged in</string>
     <string name="login_failed_message">Failed to login</string>
+    <string name="login_failed_wrong_credentials_message">Username or password not found!</string>
     <string name="register_success_message">Successfully registered</string>
     <string name="register_failed_message">Failed to register</string>
+    <string name="register_failed_user_already_exists_message">Sign up failed, user already exist</string>
 </resources>
