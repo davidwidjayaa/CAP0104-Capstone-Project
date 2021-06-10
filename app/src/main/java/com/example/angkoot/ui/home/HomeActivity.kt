@@ -10,18 +10,22 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.example.angkoot.R
 import com.example.angkoot.databinding.ActivityHomeBinding
+import com.example.angkoot.domain.model.UserModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class HomeActivity : AppCompatActivity() {
     private lateinit var binding: ActivityHomeBinding
     private lateinit var navController: NavController
+    lateinit var currentUser: UserModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityHomeBinding.inflate(layoutInflater)
         setContentView(binding.root)
         supportActionBar?.hide()
+
+        currentUser = intent.getParcelableExtra<UserModel>(PARAMS_USER) as UserModel
 
         val homeNavHostFragment =
             supportFragmentManager.findFragmentById(R.id.home_nav_host_fragment) as NavHostFragment
@@ -49,6 +53,6 @@ class HomeActivity : AppCompatActivity() {
     }
 
     companion object {
-        const val PARAMS_USER_ID = "PARAMS_USER_ID"
+        const val PARAMS_USER = "PARAMS_USER"
     }
 }

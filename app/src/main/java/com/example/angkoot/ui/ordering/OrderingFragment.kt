@@ -1,9 +1,7 @@
 package com.example.angkoot.ui.ordering
 
-import android.Manifest
 import android.content.IntentSender
 import android.location.Geocoder
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -15,7 +13,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.angkoot.databinding.FragmentOrderingBinding
 import com.example.angkoot.domain.model.Place
 import com.example.angkoot.utils.PermissionUtils
-import com.example.angkoot.utils.PermissionUtils.REQUEST_CODE_LOCATION_PERMISSION
 import com.example.angkoot.utils.ToastUtils
 import com.example.angkoot.utils.ext.hide
 import com.example.angkoot.utils.ext.show
@@ -30,14 +27,12 @@ import com.google.android.gms.maps.model.*
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.FlowPreview
-import pub.devrel.easypermissions.AppSettingsDialog
-import pub.devrel.easypermissions.EasyPermissions
 import java.io.IOException
 import java.util.*
 
 @FlowPreview
 @AndroidEntryPoint
-class OrderingFragment : Fragment(), OnMapReadyCallback, EasyPermissions.PermissionCallbacks,
+class OrderingFragment : Fragment(), OnMapReadyCallback,
     PlacesAdapter.OnClickCallback {
     private var _binding: FragmentOrderingBinding? = null
     private val binding get() = _binding!!
@@ -76,7 +71,6 @@ class OrderingFragment : Fragment(), OnMapReadyCallback, EasyPermissions.Permiss
             state = BottomSheetBehavior.STATE_EXPANDED
         }
 
-        requestPermission()
         initUI()
         observeData()
     }
@@ -221,9 +215,9 @@ class OrderingFragment : Fragment(), OnMapReadyCallback, EasyPermissions.Permiss
     private fun getLastLocation() {
         if (PermissionUtils.checkLocationPermission(requireContext())) {
             fusedLocationProviderClient.lastLocation.addOnCompleteListener {
-                if (it.isSuccessful && it.result != null) {
-                    val lastLocation = it.result
+                val lastLocation = it.result
 
+                if (it.isSuccessful && lastLocation != null) {
                     try {
                         val addressList = geoCoder.getFromLocation(
                             lastLocation.latitude,
@@ -274,49 +268,6 @@ class OrderingFragment : Fragment(), OnMapReadyCallback, EasyPermissions.Permiss
 
     override fun onClick(place: Place) {
         binding.rvSearchingResults.hide()
-    }
-
-    private fun requestPermission() {
-        if (PermissionUtils.hasLocationPermission(requireContext())) return
-
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-            EasyPermissions.requestPermissions(
-                this,
-                "You need to accept location permission to use this application",
-                REQUEST_CODE_LOCATION_PERMISSION,
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            )
-        } else {
-            EasyPermissions.requestPermissions(
-                this,
-                "You need to accept location permission to use this application",
-                REQUEST_CODE_LOCATION_PERMISSION,
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.ACCESS_COARSE_LOCATION,
-                Manifest.permission.ACCESS_BACKGROUND_LOCATION
-            )
-        }
-    }
-
-    // PERMISSIONS
-    override fun onPermissionsGranted(requestCode: Int, perms: MutableList<String>) {
-        if (EasyPermissions.somePermissionPermanentlyDenied(this, perms)) {
-            AppSettingsDialog.Builder(this).build().show()
-        } else {
-            requestPermission()
-        }
-    }
-
-    override fun onPermissionsDenied(requestCode: Int, perms: MutableList<String>) {}
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this)
     }
 
     // LIFECYCLE

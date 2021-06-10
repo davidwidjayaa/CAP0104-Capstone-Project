@@ -87,7 +87,6 @@ dependencies {
     // Google Maps Location Services
     implementation "com.google.android.gms:play-services-location:$gmsServiceVersion"
     implementation "com.google.android.gms:play-services-maps:$gmsServiceVersion"
-    implementation "com.google.android.libraries.places:places:$gmsPlacesServiceVersion"
 
     // Firebase
 

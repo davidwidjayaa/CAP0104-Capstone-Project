@@ -1,18 +1,22 @@
 package com.example.angkoot.ui.register
 
+import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
-import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.example.angkoot.R
 import com.example.angkoot.databinding.ActivityRegisterBinding
 import com.example.angkoot.domain.model.UserModel
+import com.example.angkoot.ui.home.HomeActivity
+import com.example.angkoot.ui.main.MainActivity
 import com.example.angkoot.utils.EditTextInputUtils
 import com.example.angkoot.utils.ToastUtils
+import com.example.angkoot.utils.ext.hide
 import com.example.angkoot.utils.ext.isAllTrue
+import com.example.angkoot.utils.ext.show
 import com.example.angkoot.utils.ext.text
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
@@ -123,37 +127,58 @@ class RegisterActivity : AppCompatActivity() {
 
     private fun register() {
         with(binding) {
+            progressbar.show()
+            btnSignUp.isEnabled = false
 
             Log.i("firebase", "Find: " + edtUsernameRegister.text())
             reference.child(edtUsernameRegister.text()).get().addOnSuccessListener {
                 if (it.value == null) {
                     //register success
-                    var newUser = UserModel(
+                    val newUser = UserModel(
                         edtPhoneRegister.text(),
                         edtUsernameRegister.text(),
                         edtPasswordRegister.text()
                     )
-                    var id = reference.push().key
+                    val id = reference.push().key
 
 
                     reference.child(edtUsernameRegister.text()).child(id!!).setValue(newUser)
                         .addOnSuccessListener {
-                            Toast.makeText(
+                            with(Intent(applicationContext, HomeActivity::class.java)) {
+                                putExtra(HomeActivity.PARAMS_USER, newUser)
+                                startActivity(this)
+                                finish()
+                                MainActivity.getInstance()?.finish()
+                            }
+
+                            ToastUtils.show(
                                 applicationContext,
-                                "Register Success",
-                                Toast.LENGTH_SHORT
+                                getString(R.string.register_success_message)
                             )
-                                .show()
+
+                            progressbar.hide()
+                            btnSignUp.isEnabled = true
                         }
                 } else {
                     //data already exist
                     Log.i("firebase", "Got value ${it.value}")
-                    ToastUtils.show(applicationContext, "Sign up failed, data already exist")
+                    ToastUtils.show(
+                        applicationContext,
+                        getString(R.string.register_failed_user_already_exists_message)
+                    )
 
+                    progressbar.hide()
+                    btnSignUp.isEnabled = true
                 }
             }.addOnFailureListener {
                 Log.e("firebase", "Error getting data or data not found", it)
-                ToastUtils.show(applicationContext, "Sign up failed")
+                ToastUtils.show(
+                    applicationContext,
+                    getString(R.string.register_failed_message)
+                )
+
+                progressbar.hide()
+                btnSignUp.isEnabled = true
             }
 
         }

@@ -9,14 +9,17 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.example.angkoot.R
 import com.example.angkoot.databinding.ActivityLoginBinding
+import com.example.angkoot.domain.model.UserModel
 import com.example.angkoot.ui.home.HomeActivity
+import com.example.angkoot.ui.main.MainActivity
 import com.example.angkoot.utils.EditTextInputUtils
 import com.example.angkoot.utils.ToastUtils
+import com.example.angkoot.utils.ext.hide
 import com.example.angkoot.utils.ext.isAllTrue
+import com.example.angkoot.utils.ext.show
 import com.example.angkoot.utils.ext.text
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
-
 
 class LoginActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLoginBinding
@@ -48,43 +51,75 @@ class LoginActivity : AppCompatActivity() {
             edtPasswordLogin.addTextChangedListener(passwordTextWatcher)
 
             btnLogin.setOnClickListener {
+                progressbar.show()
+                btnLogin.isEnabled = false
 
-                var id = reference.push().key
                 Log.i("firebase", "Find: " + edtUsernameLogin.text.toString())
                 reference.child(edtUsernameLogin.text.toString()).get().addOnSuccessListener {
                     Log.i("firebase", "Got value ${it.value}")
 
                     if (it.value == null) {
                         //login failed
-                        ToastUtils.show(applicationContext, "Failed logged in")
+                        ToastUtils.show(
+                            applicationContext,
+                            getString(R.string.login_failed_wrong_credentials_message)
+                        )
+                        progressbar.hide()
+                        btnLogin.isEnabled = true
                     } else {
                         it.children.forEach { dt ->
                             run {
                                 if (dt.child("password").value?.equals(edtPasswordLogin.text()) == true) {
                                     Log.i("firebase", "Got value2 ${dt.child("password").value}")
+
                                     //login success
+                                    // get user info
+                                    val password = dt.child("password").value as String
+                                    val phone = dt.child("phone").value as String
+                                    val username = dt.child("username").value as String
+
+                                    val currentUser = UserModel(
+                                        phone,
+                                        username,
+                                        password
+                                    )
+
+                                    //move to home
+                                    with(Intent(applicationContext, HomeActivity::class.java)) {
+                                        putExtra(HomeActivity.PARAMS_USER, currentUser)
+                                        startActivity(this)
+                                        finish()
+                                        MainActivity.getInstance()?.finish()
+                                    }
+
                                     ToastUtils.show(
                                         applicationContext,
                                         getString(R.string.login_success_message)
                                     )
 
-                                    //move to home
-                                    with(Intent(applicationContext, HomeActivity::class.java)) {
-                                        startActivity(this)
-                                    }
-
+                                    progressbar.hide()
+                                    btnLogin.isEnabled = true
                                 } else {
                                     //login failed
-                                    ToastUtils.show(applicationContext, "Failed logged in")
+                                    ToastUtils.show(
+                                        applicationContext,
+                                        getString(R.string.login_failed_wrong_credentials_message)
+                                    )
+                                    progressbar.hide()
+                                    btnLogin.isEnabled = true
                                 }
                             }
                         }
                     }
                 }.addOnFailureListener {
                     Log.e("firebase", "Error getting data or data not found", it)
-                    ToastUtils.show(applicationContext, "Login failed")
+                    ToastUtils.show(
+                        applicationContext,
+                        getString(R.string.login_failed_message)
+                    )
+                    progressbar.hide()
+                    btnLogin.isEnabled = true
                 }
-
             }
         }
     }

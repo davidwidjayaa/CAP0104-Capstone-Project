@@ -27,6 +27,7 @@ class PlacesAdapter : ListAdapter<Place, PlacesAdapter.PlacesViewHolder>(PlaceCo
         fun bind(place: Place) {
             with(binding) {
                 tvDescription.text = place.description
+                root.setOnClickListener { callback?.onClick(place) }
             }
         }
     }
