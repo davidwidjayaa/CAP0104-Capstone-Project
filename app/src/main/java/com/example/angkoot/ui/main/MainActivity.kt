@@ -20,7 +20,7 @@ class MainActivity : AppCompatActivity() {
 
         with(binding) {
             btnGotoLogin.setOnClickListener {
-                Intent(this@MainActivity, HomeActivity::class.java).apply {
+                Intent(this@MainActivity, LoginActivity::class.java).apply {
                     startActivity(this)
                 }
             }

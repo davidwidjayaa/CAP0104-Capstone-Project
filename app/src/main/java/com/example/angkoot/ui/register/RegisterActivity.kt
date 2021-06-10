@@ -4,15 +4,18 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.example.angkoot.R
 import com.example.angkoot.databinding.ActivityRegisterBinding
-import com.example.angkoot.domain.model.User
+import com.example.angkoot.domain.model.UserModel
 import com.example.angkoot.utils.EditTextInputUtils
+import com.example.angkoot.utils.ToastUtils
 import com.example.angkoot.utils.ext.isAllTrue
 import com.example.angkoot.utils.ext.text
-import com.google.firebase.database.*
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -20,8 +23,8 @@ class RegisterActivity : AppCompatActivity() {
     private lateinit var binding: ActivityRegisterBinding
     private val viewModel: RegisterViewModel by viewModels()
 
-    private lateinit var database: DatabaseReference
-    private lateinit var usersRef: DatabaseReference
+    private lateinit var database: FirebaseDatabase
+    private lateinit var reference: DatabaseReference
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,8 +37,8 @@ class RegisterActivity : AppCompatActivity() {
     }
 
     private fun setupFirebaseDatabase() {
-        database = FirebaseDatabase.getInstance().reference
-        usersRef = FirebaseDatabase.getInstance().getReference("users")
+        database = FirebaseDatabase.getInstance()
+        reference = database.getReference("USERS")
     }
 
     private fun setupUI() {
@@ -120,19 +123,39 @@ class RegisterActivity : AppCompatActivity() {
 
     private fun register() {
         with(binding) {
-            val newUser = User(
-                edtPhoneRegister.text(),
-                edtUsernameRegister.text(),
-                edtPasswordRegister.text()
-            )
 
-            Log.d("Hehe", "user: $newUser")
+            Log.i("firebase", "Find: " + edtUsernameRegister.text())
+            reference.child(edtUsernameRegister.text()).get().addOnSuccessListener {
+                if (it.value == null) {
+                    //register success
+                    var newUser = UserModel(
+                        edtPhoneRegister.text(),
+                        edtUsernameRegister.text(),
+                        edtPasswordRegister.text()
+                    )
+                    var id = reference.push().key
 
-            val userId = usersRef.push().key?.filterIndexed { index, char -> index != 0 } ?: ""
 
-            Log.d("Hehe", "userId: $userId")
+                    reference.child(edtUsernameRegister.text()).child(id!!).setValue(newUser)
+                        .addOnSuccessListener {
+                            Toast.makeText(
+                                applicationContext,
+                                "Register Success",
+                                Toast.LENGTH_SHORT
+                            )
+                                .show()
+                        }
+                } else {
+                    //data already exist
+                    Log.i("firebase", "Got value ${it.value}")
+                    ToastUtils.show(applicationContext, "Sign up failed, data already exist")
 
-            database.child("users").child(userId).setValue(newUser)
+                }
+            }.addOnFailureListener {
+                Log.e("firebase", "Error getting data or data not found", it)
+                ToastUtils.show(applicationContext, "Sign up failed")
+            }
+
         }
     }
 

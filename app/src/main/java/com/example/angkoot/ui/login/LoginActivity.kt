@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.example.angkoot.R
@@ -12,10 +13,17 @@ import com.example.angkoot.ui.home.HomeActivity
 import com.example.angkoot.utils.EditTextInputUtils
 import com.example.angkoot.utils.ToastUtils
 import com.example.angkoot.utils.ext.isAllTrue
+import com.example.angkoot.utils.ext.text
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
+
 
 class LoginActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLoginBinding
     private val viewModel: LoginViewModel by viewModels()
+
+    private lateinit var database: FirebaseDatabase
+    private lateinit var reference: DatabaseReference
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,6 +32,12 @@ class LoginActivity : AppCompatActivity() {
 
         setupUI()
         observeData()
+        setupFirebaseDatabase()
+    }
+
+    private fun setupFirebaseDatabase() {
+        database = FirebaseDatabase.getInstance()
+        reference = database.getReference("USERS")
     }
 
     private fun setupUI() {
@@ -34,11 +48,43 @@ class LoginActivity : AppCompatActivity() {
             edtPasswordLogin.addTextChangedListener(passwordTextWatcher)
 
             btnLogin.setOnClickListener {
-                ToastUtils.show(applicationContext, getString(R.string.login_success_message))
 
-                with(Intent(applicationContext, HomeActivity::class.java)) {
-                    startActivity(this)
+                var id = reference.push().key
+                Log.i("firebase", "Find: " + edtUsernameLogin.text.toString())
+                reference.child(edtUsernameLogin.text.toString()).get().addOnSuccessListener {
+                    Log.i("firebase", "Got value ${it.value}")
+
+                    if (it.value == null) {
+                        //login failed
+                        ToastUtils.show(applicationContext, "Failed logged in")
+                    } else {
+                        it.children.forEach { dt ->
+                            run {
+                                if (dt.child("password").value?.equals(edtPasswordLogin.text()) == true) {
+                                    Log.i("firebase", "Got value2 ${dt.child("password").value}")
+                                    //login success
+                                    ToastUtils.show(
+                                        applicationContext,
+                                        getString(R.string.login_success_message)
+                                    )
+
+                                    //move to home
+                                    with(Intent(applicationContext, HomeActivity::class.java)) {
+                                        startActivity(this)
+                                    }
+
+                                } else {
+                                    //login failed
+                                    ToastUtils.show(applicationContext, "Failed logged in")
+                                }
+                            }
+                        }
+                    }
+                }.addOnFailureListener {
+                    Log.e("firebase", "Error getting data or data not found", it)
+                    ToastUtils.show(applicationContext, "Login failed")
                 }
+
             }
         }
     }

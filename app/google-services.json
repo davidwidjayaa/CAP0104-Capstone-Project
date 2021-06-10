@@ -1,8 +1,9 @@
 {
   "project_info": {
-    "project_number": "171370518544",
-    "project_id": "angkootcapstoneproject",
-    "storage_bucket": "angkootcapstoneproject.appspot.com"
+    "project_number": "78697777643",
+    "firebase_url": "https://angkoot-default-rtdb.firebaseio.com/",
+    "project_id": "angkoot",
+    "storage_bucket": "angkoot.appspot.com"
   },
   "client": [
     {
