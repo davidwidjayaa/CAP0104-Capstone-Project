@@ -1,5 +1,6 @@
 package com.example.angkoot.di
 
+import com.example.angkoot.api.AngkootApiEndpoint
 import com.example.angkoot.api.GoogleMapApiEndpoint
 import com.example.angkoot.api.GoogleMapApiEndpoint.Companion.BASE_URL
 import com.example.angkoot.api.GoogleMapApiEndpoint.Companion.hostname
@@ -15,6 +16,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
+import com.example.angkoot.api.AngkootApiEndpoint.Companion.BASE_URL as ANGKOOT_BASE_API
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -48,10 +50,20 @@ object AppModule {
 
     @Provides
     @Singleton
+    fun provideAngkootApi(): AngkootApiEndpoint =
+        Retrofit.Builder()
+            .baseUrl(ANGKOOT_BASE_API)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(AngkootApiEndpoint::class.java)
+
+    @Provides
+    @Singleton
     fun provideRemoteDataSource(
-        apiClient: GoogleMapApiEndpoint
+        googleMapApiClient: GoogleMapApiEndpoint,
+        angkootApi: AngkootApiEndpoint
     ): RemoteDataSource =
-        RemoteDataSource(apiClient)
+        RemoteDataSource(googleMapApiClient, angkootApi)
 
     @Provides
     @Singleton
