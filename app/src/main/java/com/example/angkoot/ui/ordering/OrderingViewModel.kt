@@ -1,19 +1,17 @@
 package com.example.angkoot.ui.ordering
 
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.asFlow
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import com.example.angkoot.data.AngkootRepository
 import com.example.angkoot.domain.model.Place
 import com.example.angkoot.vo.Resource
-import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @FlowPreview
@@ -24,16 +22,60 @@ class OrderingViewModel @Inject constructor(
     private val queryForSearchingPlacesPickup = MutableLiveData<String>()
     private val queryForSearchingPlacesDrop = MutableLiveData<String>()
 
-    private var latLngPickup: LatLng? = null
-    private var latLngDrop: LatLng? = null
+    private val pickupPoint = MutableLiveData<Place?>()
+    private val dropPoint = MutableLiveData<Place?>()
 
-    fun setLatLngPickup(latLng: LatLng) {
-        latLngPickup = latLng
+    private val _pickupPointDetail = MutableLiveData<Resource<Place>>()
+    val pickupPointDetail: LiveData<Resource<Place>> get() = _pickupPointDetail
+    private val _dropPointDetail = MutableLiveData<Resource<Place>>()
+    val dropPointDetail: LiveData<Resource<Place>> get() = _dropPointDetail
+
+    var areAllInputsValid = MutableLiveData(listOf(false, false))
+
+    fun validatePickupPoint(valid: Boolean) {
+        areAllInputsValid.value = areAllInputsValid.value?.mapIndexed { index, validState ->
+            if (index == 0) valid
+            else validState
+        }
     }
 
-    fun setLatLngDrop(latLng: LatLng) {
-        latLngDrop = latLng
+    fun validateDropPoint(valid: Boolean) {
+        areAllInputsValid.value = areAllInputsValid.value?.mapIndexed { index, validState ->
+            if (index == 1) valid
+            else validState
+        }
     }
+
+    fun setDetailOfPickupPlace(place: Place) =
+        viewModelScope.launch(Dispatchers.IO) {
+            val results = repository.getDetailPlacesOf(place.id)
+
+            withContext(Dispatchers.Main) {
+                _pickupPointDetail.value = results.value
+            }
+        }
+
+    fun setDetailOfDropPlace(place: Place) =
+        viewModelScope.launch(Dispatchers.IO) {
+            val results = repository.getDetailPlacesOf(place.id)
+
+            withContext(Dispatchers.Main) {
+                _dropPointDetail.value = results.value
+            }
+        }
+
+
+    fun setPickupPoint(pickupPoint: Place?) {
+        this.pickupPoint.value = pickupPoint
+    }
+
+    fun getPickupPoint() = this.pickupPoint
+
+    fun setDropPoint(dropPoint: Place?) {
+        this.dropPoint.value = dropPoint
+    }
+
+    fun getDropPoint() = this.dropPoint
 
     private val searchingPlacesPickupResults = object : MutableLiveData<Resource<List<Place>?>>() {
         override fun onActive() {

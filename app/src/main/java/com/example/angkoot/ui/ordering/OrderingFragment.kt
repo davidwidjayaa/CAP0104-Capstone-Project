@@ -2,19 +2,25 @@ package com.example.angkoot.ui.ordering
 
 import android.content.IntentSender
 import android.location.Geocoder
+import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.angkoot.R
+import com.example.angkoot.data.remote.response.GeometryResponse
+import com.example.angkoot.data.remote.response.LocationResponse
+import com.example.angkoot.data.remote.response.ViewPortResponse
 import com.example.angkoot.databinding.FragmentOrderingBinding
 import com.example.angkoot.domain.model.Place
 import com.example.angkoot.utils.PermissionUtils
 import com.example.angkoot.utils.ToastUtils
 import com.example.angkoot.utils.ext.hide
+import com.example.angkoot.utils.ext.isAllTrue
 import com.example.angkoot.utils.ext.show
 import com.example.angkoot.vo.StatusRes
 import com.google.android.gms.common.api.ApiException
@@ -30,6 +36,7 @@ import kotlinx.coroutines.FlowPreview
 import java.io.IOException
 import java.util.*
 
+@RequiresApi(Build.VERSION_CODES.M)
 @FlowPreview
 @AndroidEntryPoint
 class OrderingFragment : Fragment(), OnMapReadyCallback,
@@ -38,6 +45,7 @@ class OrderingFragment : Fragment(), OnMapReadyCallback,
     private val binding get() = _binding!!
     private var _view: View? = null
     private var placesAdapter: PlacesAdapter? = null
+    private var isDestinationSearchingActive: Boolean = false
 
     private val viewModel: OrderingViewModel by viewModels()
 
@@ -86,6 +94,8 @@ class OrderingFragment : Fragment(), OnMapReadyCallback,
 
         with(binding) {
             mapViewOrdering.getMapAsync(this@OrderingFragment)
+            tvPickupPointPreview.text = getString(R.string.pickup_point_preview)
+            tvDropPointPreview.text = getString(R.string.drop_point_preview)
 
             with(rvSearchingResults) {
                 layoutManager =
@@ -110,9 +120,14 @@ class OrderingFragment : Fragment(), OnMapReadyCallback,
                         binding.progressbar.hide()
                     }
                     StatusRes.SUCCESS -> {
-                        Log.d("Hehe", "Data: ${it.data}")
-                        Log.d("Hehe", "Message: ${it.message}")
-                        binding.progressbar.hide()
+                        if (it.data != null && it.data.isNotEmpty()) {
+                            placesAdapter?.submitList(it.data)
+                        }
+
+                        with(binding) {
+                            rvSearchingResults.show()
+                            progressbar.hide()
+                        }
                     }
                 }
             }
@@ -128,15 +143,87 @@ class OrderingFragment : Fragment(), OnMapReadyCallback,
                         binding.rvSearchingResults.hide()
                     }
                     StatusRes.SUCCESS -> {
-                        Log.d("Hehe", "Data: ${it.data}")
-                        Log.d("Hehe", "Message: ${it.message}")
                         if (it.data != null && it.data.isNotEmpty()) {
                             placesAdapter?.submitList(it.data)
                         }
-                        binding.rvSearchingResults.show()
+
+                        with(binding) {
+                            rvSearchingResults.show()
+                            progressbar.hide()
+                        }
+                    }
+                }
+            }
+
+            pickupPointDetail.observe(viewLifecycleOwner) {
+                when (it.status) {
+                    StatusRes.LOADING -> {
+                        binding.progressbar.show()
+                    }
+                    StatusRes.ERROR -> {
+                        binding.progressbar.hide()
+                    }
+                    StatusRes.SUCCESS -> {
+                        viewModel.setPickupPoint(it.data)
                         binding.progressbar.hide()
                     }
                 }
+            }
+
+            dropPointDetail.observe(viewLifecycleOwner) {
+                when (it.status) {
+                    StatusRes.LOADING -> {
+                        binding.progressbar.show()
+                    }
+                    StatusRes.ERROR -> {
+                        binding.progressbar.hide()
+                    }
+                    StatusRes.SUCCESS -> {
+                        viewModel.setDropPoint(it.data)
+                        binding.progressbar.hide()
+                    }
+                }
+            }
+
+            getPickupPoint().observe(viewLifecycleOwner) { pickupPoint ->
+                with(binding) {
+                    if (pickupPoint != null) {
+                        tvPickupPointPreview.text = pickupPoint.name
+                        tvPickupPointPreview.setTextColor(requireContext().getColor(R.color.colorAccent))
+
+                        viewModel.validatePickupPoint(true)
+                        ToastUtils.show(requireContext(), "Pickup point setup")
+                    } else {
+                        tvPickupPointPreview.text = getString(R.string.pickup_point_preview)
+                        tvPickupPointPreview.setTextColor(requireContext().getColor(R.color.white))
+                        viewModel.validatePickupPoint(false)
+                    }
+                }
+            }
+
+            getDropPoint().observe(viewLifecycleOwner) { dropPoint ->
+                with(binding) {
+                    if (dropPoint != null) {
+                        tvDropPointPreview.text = dropPoint.name
+                        tvDropPointPreview.setTextColor(requireContext().getColor(R.color.colorAccent))
+
+                        dropPoint.geometry?.let {
+                            val latLng = LatLng(it.location.latitude, it.location.longitude)
+                            setMarker(latLng, dropPoint.name ?: "")
+                        }
+
+                        viewModel.validateDropPoint(true)
+                        ToastUtils.show(requireContext(), "Drop point setup")
+                    } else {
+                        tvDropPointPreview.text = getString(R.string.pickup_point_preview)
+                        tvDropPointPreview.setTextColor(requireContext().getColor(R.color.white))
+                        viewModel.validateDropPoint(false)
+                    }
+                }
+            }
+
+            areAllInputsValid.observe(viewLifecycleOwner) { validState ->
+                binding.btnOrder.isEnabled = validState.isAllTrue()
             }
         }
     }
@@ -231,17 +318,23 @@ class OrderingFragment : Fragment(), OnMapReadyCallback,
                         moveMapCameraTo(LatLng(currentAddress.latitude, currentAddress.longitude))
                         googleMap.isMyLocationEnabled = true
 
-                        viewModel.setLatLngPickup(
-                            LatLng(
-                                lastLocation.latitude,
-                                lastLocation.longitude,
+                        val location = LocationResponse(
+                            currentAddress.latitude,
+                            currentAddress.longitude
+                        )
+                        val viewPort = ViewPortResponse(location, location)
+                        val geometry = GeometryResponse(location, viewPort)
+
+                        viewModel.setPickupPoint(
+                            Place(
+                                "no-id", geometry, null, "Current Position", ""
                             )
                         )
 
                         with(binding) {
-                            svPickup.queryHint = "Current Location set"
                             svDrop.isIconified = true
                             svDrop.requestFocus()
+                            isDestinationSearchingActive = true
                         }
 
                         with(binding) {
@@ -261,13 +354,24 @@ class OrderingFragment : Fragment(), OnMapReadyCallback,
 
                     moveMapCameraTo(LatLng(-6.23139938, 106.95464244))
                     googleMap.isMyLocationEnabled = true
+                    isDestinationSearchingActive = false
                 }
             }
         }
     }
 
     override fun onClick(place: Place) {
-        binding.rvSearchingResults.hide()
+        with(binding) {
+            rvSearchingResults.hide()
+            svDrop.clearFocus()
+            svPickup.clearFocus()
+
+            if (isDestinationSearchingActive) {
+                viewModel.setDetailOfDropPlace(place)
+            } else {
+                viewModel.setDetailOfPickupPlace(place)
+            }
+        }
     }
 
     // LIFECYCLE
@@ -323,8 +427,10 @@ class OrderingFragment : Fragment(), OnMapReadyCallback,
             false
 
         override fun onQueryTextChange(newText: String?): Boolean {
-            if (newText != null)
+            if (newText != null) {
                 viewModel.setQueryForSearchingPlacesPickup(newText)
+                isDestinationSearchingActive = false
+            }
 
             return true
         }
@@ -335,8 +441,10 @@ class OrderingFragment : Fragment(), OnMapReadyCallback,
             false
 
         override fun onQueryTextChange(newText: String?): Boolean {
-            if (newText != null)
+            if (newText != null) {
                 viewModel.setQueryForSearchingPlacesDrop(newText)
+                isDestinationSearchingActive = true
+            }
 
             return true
         }
