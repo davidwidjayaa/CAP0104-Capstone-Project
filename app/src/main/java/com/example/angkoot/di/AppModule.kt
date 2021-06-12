@@ -1,8 +1,8 @@
 package com.example.angkoot.di
 
-import com.example.angkoot.api.ApiEndpoint
-import com.example.angkoot.api.ApiEndpoint.Companion.BASE_URL
-import com.example.angkoot.api.ApiEndpoint.Companion.hostname
+import com.example.angkoot.api.GoogleMapApiEndpoint
+import com.example.angkoot.api.GoogleMapApiEndpoint.Companion.BASE_URL
+import com.example.angkoot.api.GoogleMapApiEndpoint.Companion.hostname
 import com.example.angkoot.data.AngkootRepository
 import com.example.angkoot.data.remote.RemoteDataSource
 import dagger.Module
@@ -36,20 +36,20 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideRetrofit(
+    fun provideGoogleMapApi(
         client: OkHttpClient
-    ): ApiEndpoint =
+    ): GoogleMapApiEndpoint =
         Retrofit.Builder()
             .baseUrl(BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
             .client(client)
             .build()
-            .create(ApiEndpoint::class.java)
+            .create(GoogleMapApiEndpoint::class.java)
 
     @Provides
     @Singleton
     fun provideRemoteDataSource(
-        apiClient: ApiEndpoint
+        apiClient: GoogleMapApiEndpoint
     ): RemoteDataSource =
         RemoteDataSource(apiClient)
 

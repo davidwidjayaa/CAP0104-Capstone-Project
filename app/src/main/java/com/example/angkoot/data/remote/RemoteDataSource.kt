@@ -3,7 +3,7 @@ package com.example.angkoot.data.remote
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.example.angkoot.api.ApiEndpoint
+import com.example.angkoot.api.GoogleMapApiEndpoint
 import com.example.angkoot.domain.model.Place
 import com.example.angkoot.utils.ext.asModel
 import com.example.angkoot.vo.Resource
@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.flowOn
 import javax.inject.Inject
 
 class RemoteDataSource @Inject constructor(
-    private val api: ApiEndpoint
+    private val api: GoogleMapApiEndpoint
 ) {
 
     suspend fun searchPlaces(query: String) = flow {
