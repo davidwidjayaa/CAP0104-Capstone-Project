@@ -22,11 +22,11 @@ object DateAndTimeUtils {
 
     fun isLateNight(): Boolean {
         val hour = getCurrentHour()
-        return hour in 0..6 || hour in 21..24
+        return hour in 0..5 || hour in 21..24
     }
 
     @SuppressLint("SimpleDateFormat")
-    private fun getCurrentDateTime() =
+    fun getCurrentDateTime() =
         SimpleDateFormat("yyyy.MM.dd G 'at' HH:mm:ss z")
             .format(Date())
 }

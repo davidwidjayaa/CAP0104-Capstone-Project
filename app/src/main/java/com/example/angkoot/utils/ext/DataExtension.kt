@@ -35,3 +35,6 @@ fun DetailPlacesResponse.asModel(): Place =
 
 fun PredictionResponse.asModel(): Prediction =
     Prediction(cost)
+
+fun Boolean.int() =
+    if (this) 1 else 0
