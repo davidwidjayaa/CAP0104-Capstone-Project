@@ -1,6 +1,5 @@
 package com.example.angkoot.data.remote
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.example.angkoot.api.AngkootApiEndpoint
@@ -38,7 +37,6 @@ class RemoteDataSource @Inject constructor(
     }.flowOn(Dispatchers.IO)
 
     suspend fun getDetailPlacesOf(placeId: String): LiveData<Resource<Place>> {
-        Log.d("Hehe", "Hehe")
         val actualValue = MutableLiveData<Resource<Place>>(Resource.loading(null))
 
         try {
