@@ -3,7 +3,9 @@ package com.example.angkoot.ui.ordering
 import androidx.lifecycle.*
 import com.example.angkoot.data.AngkootRepository
 import com.example.angkoot.domain.model.Place
+import com.example.angkoot.domain.model.Prediction
 import com.example.angkoot.vo.Resource
+import com.google.android.gms.maps.model.LatLng
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
@@ -12,6 +14,7 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import okhttp3.MultipartBody
 import javax.inject.Inject
 
 @FlowPreview
@@ -31,6 +34,9 @@ class OrderingViewModel @Inject constructor(
     val dropPointDetail: LiveData<Resource<Place>> get() = _dropPointDetail
 
     var areAllInputsValid = MutableLiveData(listOf(false, false))
+
+    private val _predictionResult = MutableLiveData<Resource<Prediction>>()
+    val predictionResult: LiveData<Resource<Prediction>> get() = _predictionResult
 
     fun validatePickupPoint(valid: Boolean) {
         areAllInputsValid.value = areAllInputsValid.value?.mapIndexed { index, validState ->
@@ -131,4 +137,22 @@ class OrderingViewModel @Inject constructor(
     fun setQueryForSearchingPlacesDrop(newQuery: String) {
         queryForSearchingPlacesDrop.value = newQuery
     }
+
+    fun predictCost(filePart: MultipartBody.Part) = viewModelScope.launch {
+        val results = repository.predictCost(filePart)
+
+        withContext(Dispatchers.Main) {
+            _predictionResult.value = results.value
+        }
+    }
+
+    fun getPickupLatLng() = LatLng(
+        pickupPoint.value!!.geometry!!.location.latitude,
+        pickupPoint.value!!.geometry!!.location.longitude,
+    )
+
+    fun getDropOffLatLng() = LatLng(
+        dropPoint.value!!.geometry!!.location.latitude,
+        dropPoint.value!!.geometry!!.location.longitude,
+    )
 }
