@@ -18,6 +18,7 @@ import com.example.angkoot.data.remote.response.ViewPortResponse
 import com.example.angkoot.databinding.FragmentOrderingBinding
 import com.example.angkoot.domain.model.Place
 import com.example.angkoot.utils.PermissionUtils
+import com.example.angkoot.utils.PredictFIleUtils
 import com.example.angkoot.utils.ToastUtils
 import com.example.angkoot.utils.ext.hide
 import com.example.angkoot.utils.ext.isAllTrue
@@ -106,6 +107,8 @@ class OrderingFragment : Fragment(), OnMapReadyCallback,
 
             svPickup.setOnQueryTextListener(svPickupListener)
             svDrop.setOnQueryTextListener(svDropListener)
+
+            btnOrder.setOnClickListener { orderAngkoot() }
         }
     }
 
@@ -224,6 +227,21 @@ class OrderingFragment : Fragment(), OnMapReadyCallback,
 
             areAllInputsValid.observe(viewLifecycleOwner) { validState ->
                 binding.btnOrder.isEnabled = validState.isAllTrue()
+            }
+
+            predictionResult.observe(viewLifecycleOwner) {
+                when (it.status) {
+                    StatusRes.LOADING -> {
+                        binding.progressbar.show()
+                    }
+                    StatusRes.ERROR -> {
+                        binding.progressbar.hide()
+                    }
+                    StatusRes.SUCCESS -> {
+                        ToastUtils.show(requireContext(), "Successfully ordered!")
+                        binding.progressbar.hide()
+                    }
+                }
             }
         }
     }
@@ -371,6 +389,19 @@ class OrderingFragment : Fragment(), OnMapReadyCallback,
             } else {
                 viewModel.setDetailOfPickupPlace(place)
             }
+        }
+    }
+
+    private fun orderAngkoot() {
+        with(viewModel) {
+            val filePart = PredictFIleUtils.prepareMultipartBodyFile(
+                requireContext(),
+                getPickupLatLng(),
+                getDropOffLatLng(),
+                1
+            )
+
+            viewModel.predictCost(filePart)
         }
     }
 
